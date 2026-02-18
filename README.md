@@ -325,3 +325,18 @@ curl http://localhost:8000/monitoring/stats
 | `yfinance` | ≥0.2.37 | Dados financeiros em tempo real |
 | `prometheus-client` | ≥0.20 | Exportação de métricas |
 | `psutil` | ≥5.9 | Métricas de sistema |
+
+---
+
+## 👥 Autores
+
+- **Giovanna de Lima** - [GitHub](https://github.com/Badgioo)
+- **Lucas Edmundo** - [GitHub](https://github.com/lucasedmundo11)
+
+---
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
