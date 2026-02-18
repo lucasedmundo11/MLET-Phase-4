@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: "PETR4 LSTM API"
+    orgId: 1
+    folder: "LSTM API"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

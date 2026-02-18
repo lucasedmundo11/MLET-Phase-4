@@ -1,0 +1,27 @@
+{
+  "symbol": "PETR4.SA",
+  "start_date": "2018-01-01",
+  "end_date": "2024-07-20",
+  "look_back": 60,
+  "normalization": "per-window (divide by first element of window)",
+  "feature": "Close price (normalized)",
+  "target": "Close[t] / Close[t - look_back]  (ratio ~ 1.0)",
+  "reconstruction": "pred_price = y_pred * ref  where ref = Close[t - look_back]",
+  "architecture": "LSTM(128) -> LSTM(64) -> Dense(32) -> Dense(1)",
+  "loss_function": "Huber",
+  "optimizer": "Adam (lr=1e-3, clipnorm=1.0)",
+  "batch_size": 32,
+  "epochs_total": 150,
+  "epochs_trained": 150,
+  "metrics_test": {
+    "MAE": 0.500759,
+    "RMSE": 0.708671,
+    "MAPE": 1.831505,
+    "R2": 0.935971
+  },
+  "train_split": "70%",
+  "val_split": "15%",
+  "test_split": "15%",
+  "created_at": "2026-02-18T16:30:20.221686",
+  "tf_version": "2.20.0"
+}

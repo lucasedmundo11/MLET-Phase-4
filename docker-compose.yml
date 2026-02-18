@@ -1,0 +1,92 @@
+version: "3.8"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stack de deploy:
+#   api        → FastAPI com modelo LSTM (porta 8000)
+#   prometheus → Coleta de métricas (porta 9090)
+#   grafana    → Dashboard de monitoramento (porta 3000)
+#
+# Uso:
+#   docker compose up -d --build          # sobe toda a stack
+#   docker compose up -d api              # apenas a API
+#   docker compose logs -f api            # acompanhar logs
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── API ─────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: petr4-lstm-api:latest
+    container_name: petr4-lstm-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Permite atualizar modelos sem rebuild da imagem
+      - ./models:/app/models:ro
+    environment:
+      - MODEL_PATH=models/lstm_petr4_final.keras
+      - METADATA_PATH=models/model_metadata.json
+      - LOOK_BACK=60
+    restart: unless-stopped
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+
+  # ── Prometheus ───────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: petr4-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  # ── Grafana ──────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: petr4-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=localhost
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+volumes:
+  prometheus_data:
+  grafana_data:
+
+# ── Networks ──────────────────────────────────────────────────────────────────
+networks:
+  monitoring:
+    driver: bridge

@@ -1,0 +1,115 @@
+{
+  "title": "PETR4 LSTM API — Monitoramento",
+  "uid": "petr4-lstm-api",
+  "version": 1,
+  "schemaVersion": 38,
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Status do Modelo",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "model_loaded",
+          "legendFormat": "Modelo carregado"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "thresholds": {
+          "steps": [
+            { "color": "red", "value": 0 },
+            { "color": "green", "value": 1 }
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Requisições por Segundo",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "{{method}} {{endpoint}} ({{status_code}})"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Latência P95 (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) * 1000",
+          "legendFormat": "p95 — {{endpoint}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Total de Predições",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(predictions_total)",
+          "legendFormat": "Total"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Uso de CPU (%)",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "process_cpu_usage_percent",
+          "legendFormat": "CPU"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "thresholds": {
+          "steps": [
+            { "color": "green", "value": 0 },
+            { "color": "yellow", "value": 60 },
+            { "color": "red", "value": 85 }
+          ]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Uso de Memória (MB)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "process_memory_usage_bytes / 1024 / 1024",
+          "legendFormat": "Memória RSS (MB)"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Predições por Tipo",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "predictions_total",
+          "legendFormat": "{{prediction_type}}"
+        }
+      ]
+    }
+  ]
+}
