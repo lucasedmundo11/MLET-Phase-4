@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # ── POST /predict ──────────────────────────────────────────────────────────────
 
 @router.post(
-    "/",
+    "",
     response_model=PredictionResponse,
     summary="Predição — entrada manual",
     description=(

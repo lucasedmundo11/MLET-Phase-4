@@ -1,9 +1,9 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import make_asgi_app
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.config import API_DESCRIPTION, API_TITLE, API_VERSION, METADATA_PATH, MODEL_PATH
 from app.middleware.metrics import MetricsMiddleware
@@ -39,6 +39,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    redirect_slashes=False,
 )
 
 # CORS — permite acesso de qualquer origem (ajuste para produção se necessário)
@@ -53,9 +54,10 @@ app.add_middleware(
 # Middleware de métricas (Prometheus)
 app.add_middleware(MetricsMiddleware)
 
-# Endpoint /metrics no formato Prometheus
-metrics_app = make_asgi_app()
-app.mount("/metrics", metrics_app)
+# Endpoint /metrics no formato Prometheus (rota direta, sem mount)
+@app.get("/metrics", include_in_schema=False)
+async def metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # ── Routers ────────────────────────────────────────────────────────────────────
 app.include_router(health.router)

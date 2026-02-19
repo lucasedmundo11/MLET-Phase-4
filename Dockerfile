@@ -11,21 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
-# Use tensorflow-cpu for inference (smaller image, no GPU needed)
+# tensorflow-cpu (x86_64) / tensorflow (arm64) — detectado automaticamente via requirements.txt
+# Para amd64 Linux em produção: substituir tensorflow por tensorflow-cpu no requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir \
-        "tensorflow-cpu>=2.15.0" \
-        fastapi>=0.111.0 \
-        "uvicorn[standard]>=0.29.0" \
-        numpy>=1.24.0 \
-        pandas>=2.0.0 \
-        yfinance>=0.2.37 \
-        scikit-learn>=1.3.0 \
-        joblib>=1.3.0 \
-        "prometheus-client>=0.20.0" \
-        "psutil>=5.9.0" \
-        "pydantic>=2.0.0" \
-        "python-multipart>=0.0.9"
+    pip install --no-cache-dir -r requirements.txt
 
 
 # ── Runtime stage ──────────────────────────────────────────────────────────────
